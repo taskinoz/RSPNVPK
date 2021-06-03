@@ -9,7 +9,7 @@ namespace RSPNVPK.VPK
 {
     class DirEntryBlock
     {
-        public uint CRC { get; private set; }
+        public uint CRC { get; private set; } // File's CRC
         public ushort NumBytes { get; private set; }
         public ushort FileIdx { get; private set; }
 
@@ -30,6 +30,8 @@ namespace RSPNVPK.VPK
 
             CRC = reader.ReadUInt32();
             NumBytes = reader.ReadUInt16();
+            if (NumBytes != 0)
+                throw new Exception($"NumBytes != 0");
             FileIdx = reader.ReadUInt16();
 
             // read entries
