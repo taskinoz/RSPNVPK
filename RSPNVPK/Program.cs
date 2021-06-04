@@ -59,7 +59,8 @@ namespace RSPNVPK
             var fstream = new FileStream(vpkdir, FileMode.Open, FileAccess.ReadWrite);
             var k0k = new FileStream(vpkarch, FileMode.OpenOrCreate, FileAccess.Write);
             k0k.Position = 0;
-            
+            k0k.SetLength(0);
+
             var writer = new BinaryWriter(fstream);
             var vpk = new VPK.DirFile(fstream);
             Console.WriteLine($"{vpk.Header.DirectorySize:X4} | {vpk.Header.EmbeddedChunkSize:X4}");
