@@ -1,36 +1,63 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 
 namespace RSPNVPK
 {
     class Program
     {
-        static readonly string[] filesEdit =
-        {
-            //"scripts/kb_act.lst",
-
-            //*
-            "resource/ui/menus/advanced_hud.menu",
-            "resource/ui/menus/audio.menu",
-            "resource/ui/menus/controls.menu",
-            //"resource/ui/menus/extras.menu", // not in the game
-            "resource/ui/menus/panels/mainmenu.res",
-            "resource/ui/menus/panels/spotlight.res",
-            "scripts/kb_act.lst",
-            // vscripts
-            "scripts/vscripts/ui/menu_controls.nut",
-            "scripts/vscripts/_items.nut",
-            "scripts/vscripts/ui/menu_advanced_hud.nut",
-            "scripts/vscripts/ui/menu_audio_settings.nut",
-            //"scripts/vscripts/ui/menu_extra_settings.nut", // doesn't exist
-            "scripts/vscripts/ui/menu_main.nut",
-            "scripts/vscripts/ui/_menus.nut", //*/
-        };
-
         static void Main(string[] args)
         {
-            var fstream = new FileStream(@"D:\OriginGays\Titanfall2\vpk\englishclient_frontend.bsp.pak000_dir.vpk", FileMode.Open, FileAccess.ReadWrite);
-            var k0k = new FileStream(@"D:\OriginGays\Titanfall2\vpk\client_frontend.bsp.pak000_228.vpk", FileMode.OpenOrCreate, FileAccess.Write);
+            if(args.Length < 1)
+            {
+                Console.WriteLine("Invalid usage...");
+                return;
+            }
+
+            var vpkdir = args[0];
+            if(!vpkdir.EndsWith("_dir.vpk"))
+            {
+                Console.WriteLine($"Invalid directory file {vpkdir}");
+                return;
+            }
+
+            var vpkarch = vpkdir.Replace("_dir.vpk", "_228.vpk").Replace("english", "");
+            var directory = vpkdir.Replace(".vpk", "")+"\\";
+
+            Console.WriteLine($"VPK directory: {vpkdir}\n" +
+                $"VPK archive: {vpkarch}\n" +
+                $"Directory: {directory}");
+
+            var filesEdit = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace('\\', '/'));
+            foreach(var edit in filesEdit)
+            {
+                Console.WriteLine($"\t{edit}");
+            }
+
+            Console.WriteLine(@"
+ _____ _   _ ___ ____    _____ ___   ___  _
+|_   _| | | |_ _/ ___|  |_   _/ _ \ / _ \| |
+  | | | |_| || |\___ \    | || | | | | | | |
+  | | |  _  || | ___) |   | || |_| | |_| | |___
+  |_| |_| |_|___|____/    |_| \___/ \___/|_____|
+
+ ____   ___  _____ ____  _   _ _ _____   __  __    _    _  _______
+|  _ \ / _ \| ____/ ___|| \ | ( )_   _| |  \/  |  / \  | |/ / ____|
+| | | | | | |  _| \___ \|  \| |/  | |   | |\/| | / _ \ | ' /|  _|
+| |_| | |_| | |___ ___) | |\  |   | |   | |  | |/ ___ \| . \| |___
+|____/ \___/|_____|____/|_| \_|   |_|   |_|  |_/_/   \_\_|\_\_____|
+
+ ____    _    ____ _  ___   _ ____  ____  _ _ _
+| __ )  / \  / ___| |/ / | | |  _ \/ ___|| | | |
+|  _ \ / _ \| |   | ' /| | | | |_) \___ \| | | |
+| |_) / ___ \ |___| . \| |_| |  __/ ___) |_|_|_|
+|____/_/   \_\____|_|\_\\___/|_|   |____/(_|_|_)
+");
+            Console.WriteLine("Press Enter to continue");
+            Console.ReadLine();
+
+            var fstream = new FileStream(vpkdir, FileMode.Open, FileAccess.ReadWrite);
+            var k0k = new FileStream(vpkarch, FileMode.OpenOrCreate, FileAccess.Write);
             k0k.Position = 0;
             
             var writer = new BinaryWriter(fstream);
@@ -38,22 +65,18 @@ namespace RSPNVPK
             Console.WriteLine($"{vpk.Header.DirectorySize:X4} | {vpk.Header.EmbeddedChunkSize:X4}");
             foreach (var block in vpk.EntryBlocks)
             {
-                Console.WriteLine($"{block.Path}: {block.CRC:X8} | {block.FileIdx} | {block.NumBytes:X4}");
-                foreach (var e in block.Entries)
+                foreach (var edit in filesEdit)
                 {
-                    Console.WriteLine($"\t@{e.StartPosition:X16} {e.Flags:X8} | {e.Flags2:X4} | {e.Compressed} | {e.CompressedSize:X16} | {e.DecompressedSize:X16}");
-                }
-
-                foreach(var edit in filesEdit)
-                {
-                    if(edit == block.Path)
+                    if (edit == block.Path)
                     {
+                        Console.WriteLine($"Replacing {edit}...");
+
                         if (block.Entries.Length > 1)
-                            throw new Exception("Brih");
+                            throw new Exception("!!! NOT SUPPORTED !!!");
 
                         var crc = new Crc32();
-                        var fb = File.ReadAllBytes(@"D:\Projects\Enhanced-Menu-Mod\src\" + edit);
-                        if(fb.Length == 0)
+                        var fb = File.ReadAllBytes(directory + edit);
+                        if (fb.Length == 0)
                             throw new Exception("Brih");
 
                         // block's CRC
@@ -77,22 +100,10 @@ namespace RSPNVPK
                         k0k.Flush();
                     }
                 }
-
-                /*if(block.Path == "resource/ui/menus/main.menu")
-                {
-                    // decompress that bad boy!
-                    var stream = new FileStream(@"D:\OriginGays\Titanfall2\vpk\client_frontend.bsp.pak000_006.vpk", FileMode.Open, FileAccess.Read);
-                    stream.Position = (long)block.Entries[0].Offset;
-                    var buf = new byte[block.Entries[0].CompressedSize];
-                    stream.Read(buf);
-                    var ret = Utils.DecompressMemory(buf, block.Entries[0].DecompressedSize);
-                    File.WriteAllBytes(@"D:\OriginGays\Titanfall2\vpk\AAAAAA.main_menu.txt", ret);
-
-                    var bruh = File.ReadAllBytes(@"D:\OriginGays\Titanfall2\vpk\AAAAAA.main_menu_mod.txt");
-                    var k0k = Utils.CompressMemory(bruh);
-                    File.WriteAllBytes(@"D:\OriginGays\Titanfall2\vpk\AAAAAA.main_menu_mod.dat", k0k);
-                }*/
             }
+
+            Console.WriteLine("Done!\nPress Enter to exit!");
+            Console.ReadLine();
         }
     }
 }

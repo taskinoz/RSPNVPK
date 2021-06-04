@@ -48,7 +48,7 @@ namespace RSPNVPK.VPK
                 if (bs != 0 && bs != DirEntryBlock.TERMINTAOR)
                 {
                     //throw new Exception("Bruh assert");
-                    Console.WriteLine($"A?: {bs:X4}");
+                    //Console.WriteLine($"A?: {bs:X4}");
                 }
             }
             while (bs != DirEntryBlock.TERMINTAOR);
