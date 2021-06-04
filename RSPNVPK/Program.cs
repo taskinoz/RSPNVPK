@@ -14,6 +14,17 @@ namespace RSPNVPK
                 return;
             }
 
+            var silent = false;
+
+            if(args.Length > 1)
+            {
+                for (var i = 1; i < args.Length; i++)
+                {
+                    if (args[i] == "-s" || args[i] == "/s")
+                        silent = true;
+                }
+            }
+
             var vpkdir = args[0];
             if(!vpkdir.EndsWith("_dir.vpk"))
             {
@@ -34,7 +45,9 @@ namespace RSPNVPK
                 Console.WriteLine($"\t{edit}");
             }
 
-            Console.WriteLine(@"
+            if (!silent)
+            {
+                Console.WriteLine(@"
  _____ _   _ ___ ____    _____ ___   ___  _
 |_   _| | | |_ _/ ___|  |_   _/ _ \ / _ \| |
   | | | |_| || |\___ \    | || | | | | | | |
@@ -53,8 +66,9 @@ namespace RSPNVPK
 | |_) / ___ \ |___| . \| |_| |  __/ ___) |_|_|_|
 |____/_/   \_\____|_|\_\\___/|_|   |____/(_|_|_)
 ");
-            Console.WriteLine("Press Enter to continue");
-            Console.ReadLine();
+                Console.WriteLine("Press Enter to continue");
+                Console.ReadLine();
+            }
 
             var fstream = new FileStream(vpkdir, FileMode.Open, FileAccess.ReadWrite);
             var k0k = new FileStream(vpkarch, FileMode.OpenOrCreate, FileAccess.Write);
@@ -115,7 +129,8 @@ namespace RSPNVPK
             VPK.DirFile.Write(writer, list.ToArray());
 
             Console.WriteLine("Done!\nPress Enter to exit!");
-            Console.ReadLine();
+            if(!silent)
+                Console.ReadLine();
         }
     }
 }
