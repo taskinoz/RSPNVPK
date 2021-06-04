@@ -28,7 +28,7 @@ namespace RSPNVPK
                 $"VPK archive: {vpkarch}\n" +
                 $"Directory: {directory}");
 
-            var filesEdit = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace('\\', '/'));
+            var filesEdit = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace('\\', '/')).ToList();
             foreach(var edit in filesEdit)
             {
                 Console.WriteLine($"\t{edit}");
@@ -63,44 +63,55 @@ namespace RSPNVPK
             var writer = new BinaryWriter(fstream);
             var vpk = new VPK.DirFile(fstream);
             Console.WriteLine($"{vpk.Header.DirectorySize:X4} | {vpk.Header.EmbeddedChunkSize:X4}");
-            foreach (var block in vpk.EntryBlocks)
+
+            var list = vpk.EntryBlocks.ToList();
+
+            for (var i = 0; i < vpk.EntryBlocks.Length; i++)
             {
+                var block = list[i];
+                string? kek = null;
+
                 foreach (var edit in filesEdit)
                 {
                     if (edit == block.Path)
                     {
                         Console.WriteLine($"Replacing {edit}...");
 
-                        if (block.Entries.Length > 1)
-                            throw new Exception("!!! NOT SUPPORTED !!!");
-
-                        var crc = new Crc32();
                         var fb = File.ReadAllBytes(directory + edit);
                         if (fb.Length == 0)
                             throw new Exception("Brih");
 
-                        // block's CRC
-                        writer.BaseStream.Position = block.StartPos;
-                        writer.Write((uint)crc.Get(fb));
-                        //writer.BaseStream.Position += 4;
-                        writer.BaseStream.Position += 2;
-                        writer.Write((ushort)228);
-
-                        var compressedSize = (ulong)fb.Length;
-                        var decompressedSize = (ulong)fb.Length;
-
-                        // Write offset alongside compressed and uncompressed sizes
-                        writer.BaseStream.Position = block.Entries[0].StartPosition + 6; // skip 32 and 16 flags
-                        writer.Write((ulong)k0k.Position);
-                        writer.Write(compressedSize);
-                        writer.Write(decompressedSize);
-                        writer.Flush();
+                        list[i] = new VPK.DirEntryBlock(fb, (ulong)k0k.Position, 228, 0x101, 0, block.Path);
 
                         k0k.Write(fb);
                         k0k.Flush();
+
+                        kek = edit;
+                        break;
                     }
                 }
+
+                if (kek != null)
+                    filesEdit.Remove(kek);
             }
+
+            // if there are still files left...
+            foreach (var edit in filesEdit)
+            {
+                Console.WriteLine($"Adding {edit}...");
+
+                var fb = File.ReadAllBytes(directory + edit);
+                if (fb.Length == 0)
+                    throw new Exception("Brih");
+
+                list.Add(new VPK.DirEntryBlock(fb, (ulong)k0k.Position, 228, 0x101, 0, edit));
+
+                k0k.Write(fb);
+                k0k.Flush();
+            }
+
+            writer.BaseStream.Position = 0;
+            VPK.DirFile.Write(writer, list.ToArray());
 
             Console.WriteLine("Done!\nPress Enter to exit!");
             Console.ReadLine();

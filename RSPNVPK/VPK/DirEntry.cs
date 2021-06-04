@@ -38,6 +38,32 @@ namespace RSPNVPK.VPK
                 throw new Exception("Wtf are you faggin' bro?"); // ASSERT
         }
 
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(Flags);
+            writer.Write(Flags2);
+
+            writer.Write(Offset);
+            writer.Write(CompressedSize);
+            writer.Write(DecompressedSize);
+        }
+
+        public DirEntry(uint flags, ushort flags2, ulong offset, ulong decompressed)
+        {
+            StartPosition = 0; // ?
+
+            Flags = flags;
+            Flags2 = flags2;
+
+            Offset = offset;
+            CompressedSize = decompressed;
+            DecompressedSize = decompressed;
+
+            // Game can't go beyond that normally?
+            if (DecompressedSize > 0x100000)
+                throw new Exception("Wtf are you faggin' bro?"); // ASSERT
+        }
+
         static public IEnumerable<DirEntry> Parse(BinaryReader reader)
         {
             ushort bs;

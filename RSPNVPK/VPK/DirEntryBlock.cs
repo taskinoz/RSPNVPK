@@ -38,6 +38,52 @@ namespace RSPNVPK.VPK
             Entries = DirEntry.Parse(reader).ToArray();
         }
 
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(CRC);
+            writer.Write(NumBytes);
+            writer.Write(FileIdx);
+
+            for(var i=0; i<Entries.Length; i++)
+            {
+                Entries[i].Write(writer);
+
+                if (i != (Entries.Length - 1))
+                {
+                    writer.Write((ushort)0);
+                } else
+                {
+                    writer.Write(TERMINTAOR);
+                }
+            }
+        }
+
+        // Decompressed constructor
+        public DirEntryBlock(byte[] data, ulong offset, ushort fileIdx, uint flags, ushort flags2, string path)
+        {
+            Path = path;
+
+            var crc = new Crc32();
+            CRC = crc.Get(data);
+            NumBytes = 0; // ?
+            FileIdx = fileIdx;
+
+            var ent_num = (data.Length + 0x100000 - 1) / 0x100000;
+            var entries = new DirEntry[ent_num];
+
+            var k = offset;
+            var szt = (ulong)data.Length;
+            for(var i=0; i < ent_num; i++)
+            {
+                var sz = Math.Min(0x100000u, szt);
+                szt -= sz;
+                entries[i] = new DirEntry(flags, flags2, k, sz);
+                k += sz;
+            }
+
+            Entries = entries;
+        }
+
         public static IEnumerable<DirEntryBlock> Parse(BinaryReader reader)
         {
             string extension, path, name;

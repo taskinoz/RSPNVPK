@@ -21,5 +21,13 @@ namespace RSPNVPK
 
             return Encoding.ASCII.GetString(vs.ToArray());
         }
+
+        public static void WriteSourceString(this BinaryWriter writer, string s, bool useNullTerminator = true)
+        {
+            writer.Write(Encoding.UTF8.GetBytes(s));
+
+            if (useNullTerminator)
+                writer.Write((byte)0x00);
+        }
     }
 }
