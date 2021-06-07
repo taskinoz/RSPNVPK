@@ -24,13 +24,13 @@ jobs:
         with:
           type: tar
           filename: 'linux-x64.tar.gz'
-          path: './RSPNVPK/bin/Release/net5.0/publishLinux'
+          directory: './RSPNVPK/bin/Release/net5.0/publishLinux'
           exclusions: 'lzham_x64.dll'
       - name: Archive Windows x64
         uses: thedoctor0/zip-release@master
         with:
           filename: 'portable-x64.zip'
-          path: './RSPNVPK/bin/Release/net5.0/publish'
+          directory: './RSPNVPK/bin/Release/net5.0/publish'
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
