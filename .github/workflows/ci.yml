@@ -1,0 +1,38 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.x'
+      - name: Build Linux x64 Portable
+        run: dotnet publish ./RSPNVPK/RSPNVPK.csproj /p:PublishProfile="LinuxPortable"
+      - name: Build Windows x64 Portable
+        run: dotnet publish ./RSPNVPK/RSPNVPK.csproj /p:PublishProfile="Portable"
+      - name: Archive Linux x64
+        uses: thedoctor0/zip-release@master
+        with:
+          type: tar
+          filename: 'linux-x64.tar.gz'
+          path: './RSPNVPK/bin/Release/net5.0/publishLinux'
+          exclusions: 'lzham_x64.dll LzhamWrapper.pdb'
+      - name: Archive Windows x64
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'portable-x64.zip'
+          path: './RSPNVPK/bin/Release/net5.0/publish'
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "linux-x64.tar.gz,portable-x64.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}

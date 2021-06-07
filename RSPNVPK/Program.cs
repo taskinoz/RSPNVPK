@@ -1,11 +1,30 @@
 ﻿using System;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace RSPNVPK
 {
     class Program
     {
+        /*
+        static void Main2(string[] args)
+        {
+            var fstream = new FileStream(@"D:\OriginGays\Titanfall2\vpk\englishclient_mp_common.bsp.pak000_dir.vpk", FileMode.Open, FileAccess.Read);
+            var vpk = new VPK.DirFile(fstream);
+            Console.WriteLine($"{vpk.Header.DirectorySize:X4} | {vpk.Header.EmbeddedChunkSize:X4}");
+
+            foreach(var block in vpk.EntryBlocks)
+            {
+                Console.WriteLine($"{block.Path}: {block.CRC:X8} | {block.FileIdx} | {block.NumBytes:X4}");
+                foreach (var e in block.Entries)
+                {
+                    Console.WriteLine($"\t@{e.StartPosition:X16} {e.Flags:X8} | {e.Flags2:X4} | {e.Compressed} | {e.CompressedSize:X16} | {e.DecompressedSize:X16}");
+                }
+            }
+        }
+        // */
+
         static void Main(string[] args)
         {
             if(args.Length < 1)
@@ -33,17 +52,41 @@ namespace RSPNVPK
             }
 
             var vpkarch = vpkdir.Replace("_dir.vpk", "_228.vpk").Replace("english", "");
-            var directory = vpkdir.Replace(".vpk", "")+"\\";
+            var directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
 
             Console.WriteLine($"VPK directory: {vpkdir}\n" +
                 $"VPK archive: {vpkarch}\n" +
                 $"Directory: {directory}");
 
-            var filesEdit = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace('\\', '/')).ToList();
-            foreach(var edit in filesEdit)
+            var filesList = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace(Path.DirectorySeparatorChar, '/')).ToList();
+            var filesEdit = new List<string>();
+            var filesDelete = new List<string>();
+
+            foreach(var file in filesList)
             {
-                Console.WriteLine($"\t{edit}");
+                if (file.EndsWith(".delete"))
+                {
+                    filesDelete.Add(file.Replace(".delete", null)); // Efficiency! ecksde
+                }
+                else
+                {
+                    filesEdit.Add(file);
+                }
             }
+            filesList = null; // Dispose ecksde
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            foreach (var edit in filesEdit)
+            {
+                Console.WriteLine($"\t[+]{edit}");
+            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            foreach (var edit in filesDelete)
+            {
+                Console.WriteLine($"\t[-]{edit}");
+            }
+            Console.ResetColor();
+
 
             if (!silent)
             {
@@ -81,16 +124,19 @@ namespace RSPNVPK
 
             var list = vpk.EntryBlocks.ToList();
 
-            for (var i = 0; i < vpk.EntryBlocks.Length; i++)
+            for (var i = 0; i < list.Count; i++)
             {
                 var block = list[i];
-                string? kek = null;
+                string kek = null;
 
                 foreach (var edit in filesEdit)
                 {
                     if (edit == block.Path)
                     {
+                        var bak = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine($"Replacing {edit}...");
+                        Console.ForegroundColor = bak;
 
                         var fb = File.ReadAllBytes(directory + edit);
                         if (fb.Length == 0)
@@ -108,9 +154,33 @@ namespace RSPNVPK
 
                 if (kek != null)
                     filesEdit.Remove(kek);
+                else
+                {
+                    foreach(var edit in filesDelete)
+                    {
+                        if (edit == block.Path)
+                        {
+                            var bak = Console.ForegroundColor;
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"Deleting {edit}...");
+                            Console.ForegroundColor = bak;
+
+                            list.RemoveAt(i);
+                            i--; // Negate ++
+
+                            kek = edit;
+
+                            break;
+                        }
+                    }
+
+                    if (kek != null)
+                        filesDelete.Remove(kek);
+                }
             }
 
             // if there are still files left...
+            Console.ForegroundColor = ConsoleColor.Green;
             foreach (var edit in filesEdit)
             {
                 Console.WriteLine($"Adding {edit}...");
@@ -124,6 +194,7 @@ namespace RSPNVPK
                 k0k.Write(fb);
                 k0k.Flush();
             }
+            Console.ResetColor();
 
             writer.BaseStream.Position = 0;
             VPK.DirFile.Write(writer, list.ToArray());
