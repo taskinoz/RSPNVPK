@@ -25,7 +25,7 @@ jobs:
           type: tar
           filename: 'linux-x64.tar.gz'
           path: './RSPNVPK/bin/Release/net5.0/publishLinux'
-          exclusions: 'lzham_x64.dll LzhamWrapper.pdb'
+          exclusions: 'lzham_x64.dll'
       - name: Archive Windows x64
         uses: thedoctor0/zip-release@master
         with:
