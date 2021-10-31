@@ -34,6 +34,7 @@ namespace RSPNVPK
             }
 
             var silent = false;
+            var dirNum = "288";
 
             if(args.Length > 1)
             {
@@ -41,6 +42,9 @@ namespace RSPNVPK
                 {
                     if (args[i] == "-s" || args[i] == "/s")
                         silent = true;
+
+                    if (args[i] == "-n")
+                        dirNum = args[i+1].ToString();
                 }
             }
 
@@ -51,7 +55,7 @@ namespace RSPNVPK
                 return;
             }
 
-            var vpkarch = vpkdir.Replace("_dir.vpk", "_228.vpk").Replace("english", "");
+            var vpkarch = vpkdir.Replace("_dir.vpk", "_"+dirNum+".vpk").Replace("english", "");
             var directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
 
             Console.WriteLine($"VPK directory: {vpkdir}\n" +
