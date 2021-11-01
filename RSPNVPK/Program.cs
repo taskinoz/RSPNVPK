@@ -45,6 +45,10 @@ namespace RSPNVPK
 
                     if (args[i] == "-n")
                         vpkname = args[i+1].ToString();
+                        // It doesn't like client vpk names less than 2
+                        // so add a 0 in front of it
+                        if (vpkname.Length < 3)
+                          vpkname = $"0{vpkname}";
                 }
             }
 
