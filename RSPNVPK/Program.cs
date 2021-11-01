@@ -34,7 +34,7 @@ namespace RSPNVPK
             }
 
             var silent = false;
-            var vpkname = "288";
+            var vpkname = "228";
 
             if(args.Length > 1)
             {
@@ -146,7 +146,7 @@ namespace RSPNVPK
                         if (fb.Length == 0)
                             throw new Exception("Brih");
 
-                        list[i] = new VPK.DirEntryBlock(fb, (ulong)k0k.Position, 228, 0x101, 0, block.Path);
+                        list[i] = new VPK.DirEntryBlock(fb, (ulong)k0k.Position, Convert.ToUInt16(vpkname), 0x101, 0, block.Path);
 
                         k0k.Write(fb);
                         k0k.Flush();
@@ -193,7 +193,7 @@ namespace RSPNVPK
                 if (fb.Length == 0)
                     throw new Exception("Brih");
 
-                list.Add(new VPK.DirEntryBlock(fb, (ulong)k0k.Position, 228, 0x101, 0, edit));
+                list.Add(new VPK.DirEntryBlock(fb, (ulong)k0k.Position, Convert.ToUInt16(vpkname), 0x101, 0, edit));
 
                 k0k.Write(fb);
                 k0k.Flush();
