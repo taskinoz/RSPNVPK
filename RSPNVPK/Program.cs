@@ -83,13 +83,14 @@ namespace RSPNVPK
                             directory = args[i+1].ToString() + Path.DirectorySeparatorChar;
                             break;
                         default:
-                            if (directory=="")
-                                directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
-                            vpkarch = vpkdir.Replace("_dir.vpk", $"_{vpkname}.vpk").Replace("english", "");
                             break;
                     }
                 }
             }
+
+            vpkarch = vpkdir.Replace("_dir.vpk", $"_{vpkname}.vpk").Replace("english", "");
+            if (directory=="")
+                directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
 
             Console.WriteLine($"VPK directory: {vpkdir}\n" +
                 $"VPK archive: {vpkarch}\n" +
