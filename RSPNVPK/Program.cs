@@ -29,38 +29,67 @@ namespace RSPNVPK
         {
             if(args.Length < 1)
             {
-                Console.WriteLine("Invalid usage...");
+                Console.WriteLine("Invalid usage, use -h for help");
                 return;
             }
 
             var silent = false;
             var vpkname = "228";
+            var vpkdir = "";
 
-            if(args.Length > 1)
+            if (args[0]!="-h")
             {
-                for (var i = 1; i < args.Length; i++)
-                {
-                    if (args[i] == "-s" || args[i] == "/s")
-                        silent = true;
-
-                    if (args[i] == "-n")
-                        vpkname = args[i+1].ToString();
-                        // It doesn't like client vpk names less than 2
-                        // so add a 0 in front of it
-                        if (vpkname.Length < 3)
-                          vpkname = $"0{vpkname}";
-                }
+                vpkdir = args[0];
+            }
+            else
+            {
+                Console.WriteLine("RSPNVPK <VPKNAME>\n"+
+                                  "   -h - Help\n"+
+                                  "   -s - Run without warning about backups\n"+
+                                  "   -n - The number of the client vpk\n"+
+                                  "   -d - Choose the directory with the files you're packing"
+                );
+                return;
             }
 
-            var vpkdir = args[0];
             if(!vpkdir.EndsWith("_dir.vpk"))
             {
                 Console.WriteLine($"Invalid directory file {vpkdir}");
                 return;
             }
 
-            var vpkarch = vpkdir.Replace("_dir.vpk", $"_{vpkname}.vpk").Replace("english", "");
-            var directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
+            var vpkarch = "";
+            var directory = "";
+
+            if(args.Length > 1)
+            {
+                for (var i = 1; i < args.Length; i++)
+                {
+                    switch (args[i])
+                    {
+                        case "-s":
+                        case "/s":
+                            silent = true;
+                            break;
+                        case "-n":
+                            vpkname = args[i+1].ToString();
+                            // It doesn't like client vpk names less than 2
+                            // so add a 0 in front of it
+                            for (var x = vpkname.Length;x < 3;x++) {
+                              vpkname = $"0{vpkname}";
+                            }
+                            break;
+                        case "-d":
+                            directory = args[i+1].ToString() + Path.DirectorySeparatorChar;
+                            break;
+                        default:
+                            if (directory=="")
+                                directory = vpkdir.Replace(".vpk", "") + Path.DirectorySeparatorChar;
+                            vpkarch = vpkdir.Replace("_dir.vpk", $"_{vpkname}.vpk").Replace("english", "");
+                            break;
+                    }
+                }
+            }
 
             Console.WriteLine($"VPK directory: {vpkdir}\n" +
                 $"VPK archive: {vpkarch}\n" +
