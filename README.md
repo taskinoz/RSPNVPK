@@ -21,3 +21,5 @@ This will give you a `englishclient_<VPKNAME>.bsp.pak000_dir.vpk` and a `client_
 If you dont want to change the VPK number to something other than 228 you can use `-n <number>`
 
 To repack without the backup warning you can use `-s` or `/s`
+
+Create a backup with `-b` or type `y` in the console when it asks about a backup.
