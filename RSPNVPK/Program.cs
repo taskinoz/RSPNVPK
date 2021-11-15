@@ -46,8 +46,9 @@ namespace RSPNVPK
                 Console.WriteLine("RSPNVPK <VPKNAME>\n"+
                                   "   -h - Help\n"+
                                   "   -s - Run without warning about backups\n"+
-                                  "   -n - The number of the client vpk\n"+
-                                  "   -d - Choose the directory with the files you're packing"
+                                  "   -n - The number of the client VPK\n"+
+                                  "   -d - Choose the directory with the files you're packing\n"+
+                                  "   -b - Create a backup of the englishclient VPK with the extension .backup"
                 );
                 return;
             }
@@ -81,6 +82,9 @@ namespace RSPNVPK
                             break;
                         case "-d":
                             directory = args[i+1].ToString() + Path.DirectorySeparatorChar;
+                            break;
+                        case "-b":
+                            System.IO.File.Copy(vpkdir, vpkdir+".backup", true);
                             break;
                         default:
                             break;
@@ -129,26 +133,15 @@ namespace RSPNVPK
             if (!silent)
             {
                 Console.WriteLine(@"
- _____ _   _ ___ ____    _____ ___   ___  _
-|_   _| | | |_ _/ ___|  |_   _/ _ \ / _ \| |
-  | | | |_| || |\___ \    | || | | | | | | |
-  | | |  _  || | ___) |   | || |_| | |_| | |___
-  |_| |_| |_|___|____/    |_| \___/ \___/|_____|
-
- ____   ___  _____ ____  _   _ _ _____   __  __    _    _  _______
-|  _ \ / _ \| ____/ ___|| \ | ( )_   _| |  \/  |  / \  | |/ / ____|
-| | | | | | |  _| \___ \|  \| |/  | |   | |\/| | / _ \ | ' /|  _|
-| |_| | |_| | |___ ___) | |\  |   | |   | |  | |/ ___ \| . \| |___
-|____/ \___/|_____|____/|_| \_|   |_|   |_|  |_/_/   \_\_|\_\_____|
-
- ____    _    ____ _  ___   _ ____  ____  _ _ _
-| __ )  / \  / ___| |/ / | | |  _ \/ ___|| | | |
-|  _ \ / _ \| |   | ' /| | | | |_) \___ \| | | |
-| |_) / ___ \ |___| . \| |_| |  __/ ___) |_|_|_|
-|____/_/   \_\____|_|\_\\___/|_|   |____/(_|_|_)
+ ____  ____  ____  _   _ _     _ ____  _  __
+|  _ \/ ___||  _ \| \ | | \   / |  _ \| |/ /
+| |_) \___ \| |_) |  \| |\ \ / /| |_) | ' /
+|  _ < ___) |  __/| |\  | \ V / |  __/| . \
+|_| \_|____/|_|   |_| \_|  \_/  |_|   |_|\_\
 ");
-                Console.WriteLine("Press Enter to continue");
-                Console.ReadLine();
+                Console.WriteLine($"Would you like to backup {vpkdir}? y/n");
+                if (Console.ReadLine().ToLower() == "y")
+                    System.IO.File.Copy(vpkdir, vpkdir+".backup", true);
             }
 
             var fstream = new FileStream(vpkdir, FileMode.Open, FileAccess.ReadWrite);
