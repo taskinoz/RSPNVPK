@@ -2,6 +2,8 @@
 
 **Author:** [mrsteyk](https://github.com/mrsteyk)
 
+![Release Build](https://github.com/taskinoz/RSPNVPK/actions/workflows/ci.yml/badge.svg)
+
 ## About
 
 RSPNVPK is a command line VPK repacking tool for Titanfall 2.
