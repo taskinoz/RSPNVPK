@@ -100,6 +100,17 @@ namespace RSPNVPK
                 $"VPK archive: {vpkarch}\n" +
                 $"Directory: {directory}");
 
+            // .vpkignore logic
+            var ignoreFileDir = $"{directory}.vpkignore";
+            string[] ignoreFiles = {};
+            if (System.IO.File.Exists(ignoreFileDir))
+            {
+              ignoreFiles = System.IO.File.ReadAllLines(ignoreFileDir);
+              // Remove ignore comments
+              ignoreFiles = ignoreFiles.Where(val => !val.Contains("#")).ToArray();
+              ignoreFiles = ignoreFiles.Concat(new string[] {".vpkignore"}).ToArray();
+            }
+
             var filesList = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Select(path => path.Replace(directory, "").Replace(Path.DirectorySeparatorChar, '/')).ToList();
             var filesEdit = new List<string>();
             var filesDelete = new List<string>();
@@ -112,11 +123,25 @@ namespace RSPNVPK
                 }
                 else
                 {
-                    filesEdit.Add(file);
+                    // Check if file is in .vpkignore list
+                    bool ignore = false;
+                    foreach (var check in ignoreFiles) {
+                      if (file.Contains(check))
+                      {
+                        ignore = true;
+                      }
+                    }
+                    if (!ignore)
+                      filesEdit.Add(file);
                 }
             }
             filesList = null; // Dispose ecksde
 
+            Console.ForegroundColor = ConsoleColor.Blue;
+            foreach (var edit in ignoreFiles)
+            {
+                Console.WriteLine($"\t[#]{(edit.EndsWith("/") ? edit+".." : edit)}");
+            }
             Console.ForegroundColor = ConsoleColor.Green;
             foreach (var edit in filesEdit)
             {
