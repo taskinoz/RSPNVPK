@@ -25,3 +25,5 @@ If you dont want to change the VPK number to something other than 228 you can us
 To repack without the backup warning you can use `-s` or `/s`
 
 Create a backup with `-b` or type `y` in the console when it asks about a backup.
+
+Support for `.vpkignore` so files don't accidentally get packed with your VPK
