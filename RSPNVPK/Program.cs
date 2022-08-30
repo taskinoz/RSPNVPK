@@ -84,6 +84,7 @@ namespace RSPNVPK
                             directory = args[i+1].ToString() + Path.DirectorySeparatorChar;
                             break;
                         case "-b":
+                            silent = true;
                             System.IO.File.Copy(vpkdir, vpkdir+".backup", true);
                             break;
                         default:
