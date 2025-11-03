@@ -36,6 +36,7 @@ namespace RSPNVPK
             var silent = false;
             var vpkname = "228";
             var vpkdir = "";
+            var output = "";
 
             if (args[0]!="-h")
             {
@@ -86,6 +87,9 @@ namespace RSPNVPK
                         case "-b":
                             silent = true;
                             System.IO.File.Copy(vpkdir, vpkdir+".backup", true);
+                            break;
+                        case "-o":
+                            output = args[i+1].ToString() + Path.DirectorySeparatorChar;
                             break;
                         default:
                             break;
@@ -171,7 +175,7 @@ namespace RSPNVPK
             }
 
             var fstream = new FileStream(vpkdir, FileMode.Open, FileAccess.ReadWrite);
-            var k0k = new FileStream(vpkarch, FileMode.OpenOrCreate, FileAccess.Write);
+            var k0k = new FileStream(output+vpkarch, FileMode.OpenOrCreate, FileAccess.Write);
             k0k.Position = 0;
             k0k.SetLength(0);
 
