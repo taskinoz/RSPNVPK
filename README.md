@@ -26,4 +26,6 @@ To repack without the backup warning you can use `-s` or `/s`
 
 Create a backup with `-b` or type `y` in the console when it asks about a backup.
 
+Select an output directory with `-o`. Defaults to the current directory if not specified.
+
 Support for `.vpkignore` so files don't accidentally get packed with your VPK

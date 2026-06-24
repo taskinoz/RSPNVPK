@@ -49,7 +49,8 @@ namespace RSPNVPK
                                   "   -s - Run without warning about backups\n"+
                                   "   -n - The number of the client VPK\n"+
                                   "   -d - Choose the directory with the files you're packing\n"+
-                                  "   -b - Create a backup of the englishclient VPK with the extension .backup"
+                                  "   -b - Create a backup of the englishclient VPK with the extension .backup\n"+
+                                  "   -o - Choose the output directory for the new VPK (defaults to current directory if not specified)"
                 );
                 return;
             }
