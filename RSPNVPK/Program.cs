@@ -84,6 +84,11 @@ namespace RSPNVPK
                             break;
                         case "-d":
                             directory = args[i+1].ToString() + Path.DirectorySeparatorChar;
+                                // Check if directory exists
+                            if (!Directory.Exists(directory))                            {
+                                Console.WriteLine($"Directory {directory} does not exist");
+                                return;
+                            }
                             break;
                         case "-b":
                             silent = true;
@@ -91,6 +96,11 @@ namespace RSPNVPK
                             break;
                         case "-o":
                             output = args[i+1].ToString() + Path.DirectorySeparatorChar;
+                            // Check if output directory exists, if not create it
+                            if (!Directory.Exists(output))
+                            {
+                                Directory.CreateDirectory(output);
+                            }
                             break;
                         default:
                             break;
