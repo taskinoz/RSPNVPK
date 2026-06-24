@@ -10,13 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '5.x'
-      - name: Install OpenSSL
-        run: sudo apt-get update && sudo apt-get install -y libssl-dev
+          dotnet-version: '8.0.x'
       - name: Build Linux x64 Portable
         run: dotnet publish ./RSPNVPK/RSPNVPK.csproj /p:PublishProfile="LinuxPortable"
       - name: Build Windows x64 Portable
@@ -26,13 +24,13 @@ jobs:
         with:
           type: tar
           filename: '../../../../../linux-x64.tar.gz'
-          directory: './RSPNVPK/bin/Release/net5.0/publishLinux'
+          directory: './RSPNVPK/bin/Release/net8.0/publishLinux'
           exclusions: 'lzham_x64.dll'
       - name: Archive Windows x64
         uses: thedoctor0/zip-release@master
         with:
           filename: '../../../../../portable-x64.zip'
-          directory: './RSPNVPK/bin/Release/net5.0/publish'
+          directory: './RSPNVPK/bin/Release/net8.0/publish'
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
