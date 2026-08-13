@@ -16,6 +16,9 @@ namespace RSPNVPK.VPK
         // entries...
         public DirEntry[] Entries { get; private set; }
 
+        // Preload data, stored inside the directory file itself
+        public byte[] PreloadData { get; private set; }
+
         // ---
         
         public long StartPos { get; private set; }
@@ -30,12 +33,15 @@ namespace RSPNVPK.VPK
 
             CRC = reader.ReadUInt32();
             NumBytes = reader.ReadUInt16();
-            if (NumBytes != 0)
-                throw new Exception($"NumBytes != 0");
             FileIdx = reader.ReadUInt16();
 
             // read entries
             Entries = DirEntry.Parse(reader).ToArray();
+
+            // read preload data that lives in the directory file
+            PreloadData = new byte[NumBytes];
+            for (var i = 0; i < NumBytes; i++)
+                PreloadData[i] = reader.ReadByte();
         }
 
         public void Write(BinaryWriter writer)
@@ -56,6 +62,9 @@ namespace RSPNVPK.VPK
                     writer.Write(TERMINTAOR);
                 }
             }
+
+            if (PreloadData != null && PreloadData.Length > 0)
+                writer.Write(PreloadData);
         }
 
         // Decompressed constructor
@@ -84,6 +93,17 @@ namespace RSPNVPK.VPK
             Entries = entries;
         }
 
+        // Constructor with precomputed entries (used by Packer when writing compressed chunks)
+        public DirEntryBlock(uint crc, ushort fileIdx, DirEntry[] entries, string path)
+        {
+            CRC = crc;
+            NumBytes = 0;
+            FileIdx = fileIdx;
+            Entries = entries;
+            Path = path;
+            PreloadData = new byte[0];
+        }
+
         public static IEnumerable<DirEntryBlock> Parse(BinaryReader reader)
         {
             string extension, path, name;
@@ -93,7 +113,8 @@ namespace RSPNVPK.VPK
                 {
                     while (!string.IsNullOrEmpty(name = reader.ReadNTString()))
                     {
-                        var fullPath = path + '/' + name + '.' + extension; // TODO: rewrite
+                        // the game stores an empty path as a single space
+                        var fullPath = path == " " ? $"{name}.{extension}" : $"{path}/{name}.{extension}"; // TODO: rewrite
                         yield return new DirEntryBlock(reader, fullPath);
                     }
                 }

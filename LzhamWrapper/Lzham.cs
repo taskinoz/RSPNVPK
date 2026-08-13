@@ -70,7 +70,8 @@ namespace LzhamWrapper
             {
                 byte* pBytes = (byte*)&parameters;
                 IntPtr outSize = new IntPtr(outBufSize);
-                CompressStatus result = (CompressStatus)lzham_compress_memory(pBytes, outBytes + outBufOffset, ref outSize, inBytes + inBufOffset, inBufSize, ref adler32);
+                UIntPtr srcSize = new UIntPtr((uint)inBufSize);
+                CompressStatus result = (CompressStatus)lzham_compress_memory(pBytes, outBytes + outBufOffset, ref outSize, inBytes + inBufOffset, srcSize, ref adler32);
                 outBufSize = outSize.ToInt32();
                 return result;
             }
@@ -156,7 +157,7 @@ namespace LzhamWrapper
         private static extern unsafe int lzham_compress2(CompressionHandle state, byte* inBuf, ref IntPtr inBufSize, byte* outBuf, ref IntPtr outBufSize, Flush flushType);
 
         [DllImport(LzhamDll, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe int lzham_compress_memory(byte* parameters, byte* dstBuffer, ref IntPtr dstLength, byte* srcBuffer, int srcLength, ref uint adler32);
+        private static extern unsafe int lzham_compress_memory(byte* parameters, byte* dstBuffer, ref IntPtr dstLength, byte* srcBuffer, UIntPtr srcLength, ref uint adler32);
 
         /// <summary>
         /// Deinitializes a compressor, releasing all allocated memory.

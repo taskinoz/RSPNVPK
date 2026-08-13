@@ -49,6 +49,9 @@ namespace RSPNVPK.VPK
         }
 
         public DirEntry(uint flags, ushort flags2, ulong offset, ulong decompressed)
+            : this(flags, flags2, offset, decompressed, decompressed) { }
+
+        public DirEntry(uint flags, ushort flags2, ulong offset, ulong compressed, ulong decompressed)
         {
             StartPosition = 0; // ?
 
@@ -56,7 +59,7 @@ namespace RSPNVPK.VPK
             Flags2 = flags2;
 
             Offset = offset;
-            CompressedSize = decompressed;
+            CompressedSize = compressed;
             DecompressedSize = decompressed;
 
             // Game can't go beyond that normally?

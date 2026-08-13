@@ -16,6 +16,9 @@
 # Mono auto generated files
 mono_crash.*
 
+# Large VPK archives (too big for GitHub)
+/vpk/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

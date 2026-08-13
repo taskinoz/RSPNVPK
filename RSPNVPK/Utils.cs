@@ -40,25 +40,39 @@ namespace RSPNVPK
             var parameters = new CompressionParameters { DictionarySize = DICT_SIZE };
             parameters.Initialize();
 
-            var compressBuf = new byte[decompressedBytes.Length];
-            var compressBufSize = (int)decompressedBytes.Length;
+            // The output buffer needs to be larger than the input for incompressible data,
+            // so start with a comfortable size and grow if lzham reports a too small buffer.
+            var compressBufSize = (int)(decompressedBytes.Length + (decompressedBytes.Length / 4) + 1024);
+            if (compressBufSize < 4096) compressBufSize = 4096;
+            var compressBuf = new byte[compressBufSize];
 
             uint adler32 = 0;
 
-            var result = LzhamWrapper.Lzham.CompressMemory(parameters, decompressedBytes, ref decompressedLength, 0, compressBuf, ref compressBufSize, 0, ref adler32);
-            if (result != CompressStatus.Success)
+            while (true)
             {
-                throw new Exception("Lzham.CompressMemory failed. Status: " + result.ToString());
-            }
-            if (decompressedLength != decompressedBytes.Length)
-            {
-                throw new Exception($"Data length mismatch: {decompressedLength} vs {decompressedBytes.Length}");
-            }
+                var inLen = decompressedLength;
+                var outLen = compressBufSize;
 
-            // WTF?!
-            var ret = new byte[compressBufSize];
-            Array.Copy(compressBuf, ret, compressBufSize);
-            return ret;
+                var result = LzhamWrapper.Lzham.CompressMemory(parameters, decompressedBytes, ref inLen, 0, compressBuf, ref outLen, 0, ref adler32);
+                if (result == CompressStatus.OutputBufferTooSmall)
+                {
+                    compressBufSize *= 2;
+                    compressBuf = new byte[compressBufSize];
+                    continue;
+                }
+                if (result != CompressStatus.Success)
+                {
+                    throw new Exception("Lzham.CompressMemory failed. Status: " + result.ToString());
+                }
+                if (inLen != decompressedBytes.Length)
+                {
+                    throw new Exception($"Data length mismatch: {inLen} vs {decompressedBytes.Length}");
+                }
+
+                var ret = new byte[outLen];
+                Array.Copy(compressBuf, ret, outLen);
+                return ret;
+            }
         }
     }
 }

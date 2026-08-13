@@ -42,7 +42,8 @@ namespace RSPNVPK.VPK
                 var ext = Path.GetExtension(b.Path).Remove(0, 1);
                 var fname = Path.GetFileName(b.Path);
 
-                var path = b.Path.Replace("/"+fname, "");
+                var path = b.Path.Substring(0, b.Path.Length - fname.Length).TrimEnd('/');
+                if (path == "") path = " ";
 
                 //map[ext] = new Dictionary<string, List<DirEntryBlock>>();
                 //[path].Add(b);
