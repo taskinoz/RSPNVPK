@@ -56,7 +56,11 @@ namespace RSPNVPK.VPK
 
                 if (i != (Entries.Length - 1))
                 {
-                    writer.Write((ushort)0);
+                    // Between chunks the format repeats the archive index
+                    // (0xFFFF only after the last chunk). Writing 0 sent
+                    // every chunk after the first of a file over 1 MB to
+                    // archive _000 whenever the archive number was not 0.
+                    writer.Write(FileIdx);
                 } else
                 {
                     writer.Write(TERMINTAOR);
